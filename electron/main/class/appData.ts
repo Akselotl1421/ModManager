@@ -50,6 +50,7 @@ class AppData {
         } catch (error) {
             logError("Erreur lors du téléchargement des sources", error);
         }
+        this.config.version = app.getVersion();
         this.isLoaded = true;
         console.log("Appdata loaded");
     }

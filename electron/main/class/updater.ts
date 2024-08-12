@@ -130,11 +130,11 @@ async function updateCheck() {
                         let compareResult = compareDates(currentVersion, latestVersion);
                         if (compareResult > 0) {
                             const platform = process.platform;
-                            let installerName = 'ModManager7-Windows-Installer.exe';
+                            let installerName = 'Mod Manager 7-Windows-Installer.exe';
                             if (platform === 'darwin') {
-                                installerName = 'ModManager7-Mac-Installer.dmg';
+                                installerName = 'Mod Manager 7-Mac-Installer.dmg';
                             } else if (platform === 'linux') {
-                                installerName = 'ModManager7-Linux-Installer.AppImage';
+                                installerName = 'Mod Manager 7-Linux-Installer.AppImage';
                             }
                             let installerAsset = latestRelease.assets.find(asset => asset.name === installerName);
                             if (!installerAsset) {

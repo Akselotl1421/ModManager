@@ -9,8 +9,10 @@ export class Mod {
     releases: any[];
     versions: ModVersion[];
     type: string;
+    needPattern?: string;
+    ignorePattern?: string;
 
-    constructor(modId: string, name: string, author: string, github: string, githubLink: string, type: string) {
+    constructor(modId: string, name: string, author: string, github: string, githubLink: string, type: string, needPattern?: string, ignorePattern?: string) {
         this.sid = modId;
         this.name = name;
         this.author = author;
@@ -19,5 +21,7 @@ export class Mod {
         this.releases = [];
         this.versions = [];
         this.type = type;
+        this.needPattern = needPattern;
+        this.ignorePattern = ignorePattern;
     }
 }

@@ -3,8 +3,6 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import Files from "./files";
-// @ts-ignore
-import decompress from "decompress";
 import { spawn, exec } from 'child_process';
 import * as os from 'os';
 // @ts-ignore
@@ -18,6 +16,7 @@ import {
 import {Mod} from "./mod";
 import {ModVersion} from "./modVersion";
 import {logError, updateTray} from "./functions";
+import AdmZip from 'adm-zip';
 
 let child: any = null;
 
@@ -104,7 +103,7 @@ class ModWorker {
             let fileUrl: string | null = null;
 
             version.release['assets'].forEach((asset: any) => {
-                if (asset['name'].endsWith('.zip')) {
+                if (asset['name'].endsWith('.zip') && (version.needPattern === null || asset['name'].includes(version.needPattern)) && (version.ignorePattern === null || !asset['name'].includes(version.ignorePattern))) {
                     installType = 'zip';
                     filename = asset['name'];
                     fileUrl = asset['browser_download_url'];
@@ -173,8 +172,10 @@ class ModWorker {
                         this.extractZipFile(tempPath, tempWorker, event, downloadText, downloadTextEnd, downloadId, "bg-green-700")
                             .then(() => {
                                 const rootPath = Files.getBepInExInsideDir(tempWorker);
-                                Files.moveDirectory(rootPath, modPath);
-                                resolve(true);
+                                setTimeout(() => {
+                                    Files.moveDirectory(rootPath, modPath);
+                                    resolve(true);
+                                }, 100);
                             })
                             .catch((error) => {
                                 reject(error);
@@ -201,19 +202,11 @@ class ModWorker {
         event.sender.send('createPopin', downloadText, downloadId, classes);
         Files.createDirectoryIfNotExist(outputFolderPath);
         try {
-            await decompress(zipFilePath, outputFolderPath)
-                .then(() => {
-                    console.log('Extraction complete.');
-                    event.sender.send('updatePopin', downloadTextEnd, downloadId, classes);
-                    event.sender.send('removePopin', downloadId);
-                })
-                .catch((error: any) => {
-                    if (error.code === 'EISDIR') {
-                        console.log('Le chemin est un dossier, non un fichier. Erreur: ' + error.message);
-                    } else {
-                        console.log('Extraction failed : ' + error);
-                    }
-                });
+            const zip = new AdmZip(zipFilePath);
+            await zip.extractAllTo(outputFolderPath, true);
+            console.log('Extraction complete.');
+            event.sender.send('updatePopin', downloadTextEnd, downloadId, classes);
+            event.sender.send('removePopin', downloadId);
             return true;
         } catch (err) {
             logError('Erreur lors de l\'extraction:', err);
@@ -276,7 +269,7 @@ class ModWorker {
             updateTray();
             downloadId = Date.now().toString();
             getMainWindow().show();
-            getMainWindow().maximize();
+            getMainWindow().focus();
             event.sender.send('createFeedback', downloadId, JSON.stringify(mod), JSON.stringify(version));
 
             console.log("Mod stopped");
@@ -355,7 +348,7 @@ class ModWorker {
             event.sender.send('updateStartedMod', false);
             updateTray();
             getMainWindow().show();
-            getMainWindow().maximize();
+            getMainWindow().focus();
 
             console.log("Vanilla stopped");
         });

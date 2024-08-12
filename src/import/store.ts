@@ -14,6 +14,8 @@ interface Mod {
         version: string;
         gameVersion: string;
     }>;
+    needPattern?: string;
+    ignorePattern?: string;
 }
 
 interface AppState {

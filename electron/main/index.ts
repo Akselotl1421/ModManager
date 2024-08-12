@@ -1,5 +1,5 @@
 // @ts-ignore
-import {app, BrowserWindow, shell, ipcMain, Menu, Tray} from 'electron'
+import {app, BrowserWindow, shell, ipcMain, Menu, Tray, screen} from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -58,11 +58,20 @@ const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
 async function createWindow() {
+
+  let { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
+
+  width = Math.round(width * 0.9);
+  height = Math.round(height * 0.9);
+
   setMainWindow(new BrowserWindow({
     title: 'Mod Manager',
     icon: path.join(process.env.VITE_PUBLIC, 'modmanager.ico'),
     show: false,
     autoHideMenuBar: true,
+    width: width,
+    height: height,
     webPreferences: {
       preload,
       // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production

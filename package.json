@@ -1,6 +1,6 @@
 {
   "name": "modmanager7",
-  "version": "7.0.0",
+  "version": "7.0.1",
   "main": "dist-electron/main/index.js",
   "description": "Mod Manager 7 by Good Loss",
   "author": "MatuxGG",
@@ -27,9 +27,9 @@
     "watch": "npx tailwindcss -i ./src/tailwind.css -o ./src/compiled.css --watch"
   },
   "dependencies": {
+    "adm-zip": "^0.5.15",
     "auto-launch": "^5.0.6",
     "axios": "^1.6.2",
-    "decompress": "^4.2.1",
     "electron-log": "^4.0.0",
     "jquery": "^3.7.1",
     "vue-i18n": "^9.11.0",
