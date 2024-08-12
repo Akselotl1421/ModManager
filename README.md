@@ -1,79 +1,52 @@
-# electron-vite-vue
+# Mod Manager
+Among Us Mod Manager is an open-source launcher for the popular game Among Us. It allows you to switch between many established mods with only a few clicks!
 
-🥳 Really simple `Electron` + `Vue` + `Vite` boilerplate.
+Join the discord: https://goodloss.fr/discord \
+Official website: https://goodloss.fr
 
-<!-- [![awesome-vite](https://awesome.re/mentioned-badge.svg)](https://github.com/vitejs/awesome-vite) -->
-<!-- [![Netlify Status](https://api.netlify.com/api/v1/badges/ae3863e3-1aec-4eb1-8f9f-1890af56929d/deploy-status)](https://app.netlify.com/sites/electron-vite/deploys) -->
-<!-- [![GitHub license](https://img.shields.io/github/license/caoxiemeihao/electron-vite-vue)](https://github.com/electron-vite/electron-vite-vue/blob/main/LICENSE) -->
-<!-- [![GitHub stars](https://img.shields.io/github/stars/caoxiemeihao/electron-vite-vue?color=fa6470)](https://github.com/electron-vite/electron-vite-vue) -->
-<!-- [![GitHub forks](https://img.shields.io/github/forks/caoxiemeihao/electron-vite-vue)](https://github.com/electron-vite/electron-vite-vue) -->
-[![GitHub Build](https://github.com/electron-vite/electron-vite-vue/actions/workflows/build.yml/badge.svg)](https://github.com/electron-vite/electron-vite-vue/actions/workflows/build.yml)
-[![GitHub Discord](https://img.shields.io/badge/chat-discord-blue?logo=discord)](https://discord.gg/sRqjYpEAUK)
+![ModManagerv5.0.1](https://amodsus.com/attachments/1642431805864-png.530/)
 
-## Features
+## How to install?
 
-📦 Out of the box  
-🎯 Based on the official [template-vue-ts](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-vue-ts), less invasive  
-🌱 Extensible, really simple directory structure  
-💪 Support using Node.js API in Electron-Renderer  
-🔩 Support C/C++ native addons  
-🖥 It's easy to implement multiple windows  
+1. Download the latest "ModManagerInstaller.exe" available [here](https://goodloss.fr/latest).
 
-## Quick Setup
+3. Launch the installer and choose a location for the software. (You should not select your Among Us directory!)
 
-```sh
-# clone the project
-git clone https://github.com/electron-vite/electron-vite-vue.git
+4. Everything is set up! :)
 
-# enter the project directory
-cd electron-vite-vue
+## How to use it?
 
-# install dependency
-npm install
+- Launch Mod Manager from windows (use the shortcut or the search bar).
 
-# develop
-npm run dev
-```
+- A window will open.
 
-## Debug
+- Choose a mod category and download any wanted mod by using the download button on the right side.
 
-![electron-vite-react-debug.gif](https://github.com/electron-vite/electron-vite-react/blob/main/electron-vite-react-debug.gif?raw=true)
+- Start a mod by clicking the launch button, which replaced the download button on the right side.
 
-## Directory
+- You are ready to play! :)
 
-```diff
-+ ├─┬ electron
-+ │ ├─┬ main
-+ │ │ └── index.ts    entry of Electron-Main
-+ │ └─┬ preload
-+ │   └── index.ts    entry of Preload-Scripts
-  ├─┬ src
-  │ └── main.ts       entry of Electron-Renderer
-  ├── index.html
-  ├── package.json
-  └── vite.config.ts
-```
+## Making a mod compatible with Mod Manager
 
-<!--
-## Be aware
+Publish a release in a public GitHub repository for your mod. In this release, you can add either (or both):
 
-🚨 By default, this template integrates Node.js in the Renderer process. If you don't need it, you just remove the option below. [Because it will modify the default config of Vite](https://github.com/electron-vite/vite-plugin-electron-renderer#config-presets-opinionated).
+- The .dll file of the mod
 
-```diff
-# vite.config.ts
+- A .zip with of the Among Us modded directory
 
-export default {
-  plugins: [
--   // Use Node.js API in the Renderer-process
--   renderer({
--     nodeIntegration: true,
--   }),
-  ],
-}
-```
--->
+Then, join the [discord](https://goodloss.fr/discord) and send your repository link. It will be a pleasure adding your mod. :)
 
-## FAQ
+Note: This section will be rewritten soon to help you use te new account system ! :)
 
-- [C/C++ addons, Node.js modules - Pre-Bundling](https://github.com/electron-vite/vite-plugin-electron-renderer#dependency-pre-bundling)
-- [dependencies vs devDependencies](https://github.com/electron-vite/vite-plugin-electron-renderer#dependencies-vs-devdependencies)
+## Credits & Resources
+
+[BepInEx](https://github.com/NuclearPowered/BepInEx) - The main dependency of every mod\
+[Reactor](https://github.com/NuclearPowered/Reactor) - The most used modding API for Among Us
+
+Thanks to every mod creator. Go check their respective GitHub repositories directly in Mod Manager!
+
+If your mod is on Mod Manager and you do not want me to include it, just send me a message in a GitHub issue or in discord DM. I will remove them without asking any question.
+
+## License
+
+This software is distributed under the GNU GPLv3 License. BepInEx is distributed under LGPL-3.0 License.
