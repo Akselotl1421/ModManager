@@ -180,21 +180,27 @@ class Files {
                 });
     
                 res.on('end', () => {
-                    if (res.statusCode === 200 || res.statusCode == 301) {
+                    if (res.statusCode >= 200 && res.statusCode < 300) {
                         try {
-                            let parsedData = JSON.parse(data);
+                            const parsedData = JSON.parse(data);
                             resolve(parsedData);
-                            console.log("Loaded releases for mod: "+author+"/"+repo);
+                            console.log(`Loaded releases for mod: ${author}/${repo}`);
                         } catch (e) {
+                            console.log(`Error parsing response: ${e}`);
                             reject(`Error parsing response: ${e}`);
                         }
+                    } else if (res.statusCode >= 300 && res.statusCode < 400) {
+                        console.log(`Redirection status code received: ${res.statusCode}`);
+                        reject(`Redirection status code received: ${res.statusCode}`);
                     } else {
+                        console.log(`Request failed with status code ${res.statusCode}`);
                         reject(`Request failed with status code ${res.statusCode}`);
                     }
                 });
             });
     
             req.on('error', (e) => {
+                console.log("Request error: "+e);
                 reject(`Request error: ${e}`);
             });
     

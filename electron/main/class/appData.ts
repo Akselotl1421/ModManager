@@ -47,8 +47,8 @@ class AppData {
         let downloadPromises = this.config.sources.map(source => this.downloadSource(source));
         try {
             await Promise.all(downloadPromises);
-        } catch (error) {
-            logError("Erreur lors du téléchargement des sources", error);
+        } catch (error: any) {
+            logError("Error when downloading sources (load)", error.message);
         }
         this.config.version = app.getVersion();
         this.isLoaded = true;
@@ -86,33 +86,44 @@ class AppData {
 
         try {
             await Promise.all(downloadPromises);
-        } catch (error) {
-            logError("Erreur lors du téléchargement des mods", error);
+        } catch (error: any) {
+            logError("Erreur during downloading source", sourceUrl, error.message);
         }
+
+        console.log("Mods loaded: ", this.modSources.flatMap(source => source.mods.map(mod => mod.name)).length);
 
         // Cleanup mods that have no releases
         this.modSources.forEach(source => {
+            const nonConserves = source.mods.filter(mod => !(mod.type === 'allInOne' || !mod.githubLink || mod.versions.some(version => version.release)));
+            console.log("Mods without releases", nonConserves.map(mod => mod.name));
             source.mods = source.mods.filter(mod => mod.type === 'allInOne' || !mod.githubLink || mod.versions.some(version => version.release));
         });
     }
 
     async downloadRelease(mod: Mod): Promise<void> {
-        mod.releases = <any>await Files.getGithubReleases(mod.author, mod.github, this.githubToken);
-        if (!mod.releases) return;
+        if (mod.sid === 'TownofHostEnhanced') {
+            console.log(JSON.stringify(mod.releases));
+        }
+        try {
+            mod.releases = <any>await Files.getGithubReleases(mod.author, mod.github, this.githubToken);
+            if (!mod.releases) return;
 
-        mod.versions.forEach(version => {
-            if (version.version === 'latest') {
-                version.release = mod.releases[0];
-            } else {
-                version.release = mod.releases.find(release => release.tag_name === version.version);
-            }
-            // console.log(mod.name, version.version); LOG
-            // if (version.release) {
-            //     console.log(mod.name, version.version, version.release.tag_name);
-            // } else {
-            //     console.log(mod.name, version.version, "release missing");
-            // }
-        });
+            mod.versions.forEach(version => {
+                if (version.version === 'latest') {
+                    version.release = mod.releases[0] === null ? null : mod.releases[0];
+                } else {
+                    version.release = mod.releases.find(release => release.tag_name === version.version);
+                }
+                // console.log(mod.name, version.version); LOG
+                // if (version.release) {
+                //     console.log(mod.name, version.version, version.release.tag_name);
+                // } else {
+                //     console.log(mod.name, version.version, "release missing");
+                // }
+            });
+        } catch (error: any) {
+            logError("Error when downloading release", mod.name, error.message);
+        }
     }
 
     updateConfig(newConfig: string | null = null): void {

@@ -178,5 +178,10 @@ process.on('exit', (code) => {
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  logError(`Unhandled Rejection at: ${promise} reason: ${reason}`);
+  if (reason instanceof Error) {
+    logError(`Unhandled Rejection at: ${promise} reason: ${reason.message}`);
+    logError(`Stack trace: ${reason.stack}`);
+  } else {
+    logError(`Unhandled Rejection at: ${promise} reason: ${reason}`);
+  }
 });

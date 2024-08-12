@@ -23,195 +23,180 @@ let child: any = null;
 class ModWorker {
 
     static async downloadClient(event: any, version: any): Promise<boolean> {
-        try {
-            const gameVersion = version.gameVersion;
-            let finished = false;
-            const downloadId = Date.now().toString();
-            const url = `${GL_FILES_URL}/client/${gameVersion}.zip`;
-            const tempPath = path.join(getAppData().config.dataPath, 'temp', `client-${gameVersion}.zip`);
-            const clientPath = path.join(getAppData().config.dataPath, 'clients', gameVersion);
+        const gameVersion = version.gameVersion;
+        let finished = false;
+        const downloadId = Date.now().toString();
+        const url = `${GL_FILES_URL}/client/${gameVersion}.zip`;
+        const tempPath = path.join(getAppData().config.dataPath, 'temp', `client-${gameVersion}.zip`);
+        const clientPath = path.join(getAppData().config.dataPath, 'clients', gameVersion);
 
-            const response = await axios({
-                method: 'get',
-                url: url,
-                responseType: 'stream'
-            });
+        const response = await axios({
+            method: 'get',
+            url: url,
+            responseType: 'stream'
+        });
 
-            const totalLength = response.headers['content-length'];
-            let progress = 0;
-            let lastProgress = 0;
-            let lastTime = Date.now();
+        const totalLength = response.headers['content-length'];
+        let progress = 0;
+        let lastProgress = 0;
+        let lastTime = Date.now();
 
-            response.data.on('data', (chunk: any) => {
-                progress += chunk.length;
-                const currentTime = Date.now();
-                const elapsedTime = currentTime - lastTime;
-                const bytesDownloaded = progress - lastProgress;
+        response.data.on('data', (chunk: any) => {
+            progress += chunk.length;
+            const currentTime = Date.now();
+            const elapsedTime = currentTime - lastTime;
+            const bytesDownloaded = progress - lastProgress;
 
-                const percentCompleted = Math.round((progress / totalLength) * 100);
+            const percentCompleted = Math.round((progress / totalLength) * 100);
 
-                const speed = elapsedTime > 0 ? (bytesDownloaded / (elapsedTime / 1000)) : 0;
+            const speed = elapsedTime > 0 ? (bytesDownloaded / (elapsedTime / 1000)) : 0;
 
-                if (currentTime - lastTime > 100) {
-                    const downloadText = `<div class='w-64'><p>`+trans('Downloading client $', gameVersion)+`</p>`+this.formatPopinProgress(percentCompleted, speed, progress, totalLength)+`</div>`;
+            if (currentTime - lastTime > 100) {
+                const downloadText = `<div class='w-64'><p>`+trans('Downloading client $', gameVersion)+`</p>`+this.formatPopinProgress(percentCompleted, speed, progress, totalLength)+`</div>`;
 
-                    if (!finished) {
-                        if (percentCompleted === 100) {
-                            finished = true;
-                        } else {
-                            event.sender.send('createPopin', downloadText, downloadId, "bg-blue-700");
-                        }
+                if (!finished) {
+                    if (percentCompleted === 100) {
+                        finished = true;
+                    } else {
+                        event.sender.send('createPopin', downloadText, downloadId, "bg-blue-700");
                     }
-                    lastTime = currentTime;
-                    lastProgress = progress;
+                }
+                lastTime = currentTime;
+                lastProgress = progress;
+            }
+        });
+
+        const writer = fs.createWriteStream(tempPath);
+        response.data.pipe(writer);
+
+        return new Promise((resolve, reject) => {
+            writer.on('finish', () => {
+                const downloadText = `<div class='w-64'><p>`+trans('Extracting client $...', gameVersion)+`</p></div>`;
+                const downloadTextEnd = `<div class='w-64'><p>`+trans('Client $ installed!', gameVersion)+`</p></div>`;
+                this.extractZipFile(tempPath, clientPath, event, downloadText, downloadTextEnd, downloadId, "bg-green-700")
+                    .then(() => {
+                        resolve(true);
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    });
+            });
+            writer.on('error', reject);
+        });
+    }
+
+    static async downloadMod(event: any, mod: any, version: any): Promise<boolean> {
+        let finished = false;
+        const downloadId = Date.now().toString();
+        let tempPath = path.join(getAppData().config.dataPath, 'temp', `mod-${mod.sid}-${version.version}.zip`);
+        const tempWorker = path.join(getAppData().config.dataPath, 'temp', 'modWorker');
+        let modPath = path.join(getAppData().config.dataPath, 'mods', `${mod.sid}-${version.version}`);
+
+        let installType: 'zip' | 'dll' | null = null;
+        let filename: string | null = null;
+        let fileUrl: string | null = null;
+
+        version.release['assets'].forEach((asset: any) => {
+            if (asset['name'].endsWith('.zip') && (version.needPattern === null || asset['name'].includes(version.needPattern)) && (version.ignorePattern === null || !asset['name'].includes(version.ignorePattern))) {
+                installType = 'zip';
+                filename = asset['name'];
+                fileUrl = asset['browser_download_url'];
+            }
+        });
+
+        if (installType === null) {
+            version.release['assets'].forEach((asset: any) => {
+                if (asset['name'].endswith('.dll')) {
+                    installType = 'dll';
+                    filename = asset['name'];
+                    fileUrl = asset['browser_download_url'];
+                    modPath = path.join(getAppData().config.dataPath, 'mods', `${mod.sid}-${version.version}`, 'BepInEx', 'plugins');
+                    tempPath = path.join(getAppData().config.dataPath, 'temp', filename);
                 }
             });
+        }
 
-            const writer = fs.createWriteStream(tempPath);
-            response.data.pipe(writer);
+        const response = await axios({
+            method: 'get',
+            url: fileUrl!,
+            responseType: 'stream'
+        });
 
-            return new Promise((resolve, reject) => {
-                writer.on('finish', () => {
-                    const downloadText = `<div class='w-64'><p>`+trans('Extracting client $...', gameVersion)+`</p></div>`;
-                    const downloadTextEnd = `<div class='w-64'><p>`+trans('Client $ installed!', gameVersion)+`</p></div>`;
-                    this.extractZipFile(tempPath, clientPath, event, downloadText, downloadTextEnd, downloadId, "bg-green-700")
+        const totalLength = response.headers['content-length'];
+        let progress = 0;
+        let lastProgress = 0;
+        let lastTime = Date.now();
+
+        response.data.on('data', (chunk: any) => {
+            progress += chunk.length;
+            const currentTime = Date.now();
+            const elapsedTime = currentTime - lastTime;
+            const bytesDownloaded = progress - lastProgress;
+
+            const percentCompleted = Math.round((progress / totalLength) * 100);
+
+            const speed = elapsedTime > 0 ? (bytesDownloaded / (elapsedTime / 1000)) : 0;
+
+            if (currentTime - lastTime > 100) {
+                const downloadText = `<div class='w-64'><p>`+trans('Downloading $', mod.name)+`</p>`+this.formatPopinProgress(percentCompleted, speed, progress, totalLength)+`</div>`;
+
+                if (!finished) {
+                    if (percentCompleted === 100) {
+                        finished = true;
+                    } else {
+                        event.sender.send('createPopin', downloadText, downloadId, "bg-blue-700");
+                    }
+                }
+
+                lastProgress = progress;
+                lastTime = currentTime;
+            }
+
+        });
+
+        const writer = fs.createWriteStream(tempPath);
+        response.data.pipe(writer);
+
+        return new Promise((resolve, reject) => {
+            writer.on('finish', () => {
+                const downloadText = `<div class='w-64'><p>`+trans('Extracting $...', mod.name)+`</p></div>`;
+                const downloadTextEnd = `<div class='w-64'><p>`+trans('$ installed!', mod.name)+`</p></div>`;
+                if (installType === 'zip') {
+                    Files.deleteDirectoryIfExist(tempWorker);
+                    this.extractZipFile(tempPath, tempWorker, event, downloadText, downloadTextEnd, downloadId, "bg-green-700")
                         .then(() => {
-                            resolve(true);
+                            const rootPath = Files.getBepInExInsideDir(tempWorker);
+                            setTimeout(() => {
+                                Files.moveDirectory(rootPath, modPath);
+                                resolve(true);
+                            }, 100);
                         })
                         .catch((error) => {
                             reject(error);
                         });
-                });
-                writer.on('error', reject);
-            });
-        } catch (error) {
-            logError('Error downloading the mod:', error);
-            return false;
-        }
-    }
-
-    static async downloadMod(event: any, mod: any, version: any): Promise<boolean> {
-        try {
-            let finished = false;
-            const downloadId = Date.now().toString();
-            let tempPath = path.join(getAppData().config.dataPath, 'temp', `mod-${mod.sid}-${version.version}.zip`);
-            const tempWorker = path.join(getAppData().config.dataPath, 'temp', 'modWorker');
-            let modPath = path.join(getAppData().config.dataPath, 'mods', `${mod.sid}-${version.version}`);
-
-            let installType: 'zip' | 'dll' | null = null;
-            let filename: string | null = null;
-            let fileUrl: string | null = null;
-
-            version.release['assets'].forEach((asset: any) => {
-                if (asset['name'].endsWith('.zip') && (version.needPattern === null || asset['name'].includes(version.needPattern)) && (version.ignorePattern === null || !asset['name'].includes(version.ignorePattern))) {
-                    installType = 'zip';
-                    filename = asset['name'];
-                    fileUrl = asset['browser_download_url'];
-                }
-            });
-
-            if (installType === null) {
-                version.release['assets'].forEach((asset: any) => {
-                    if (asset['name'].endswith('.dll')) {
-                        installType = 'dll';
-                        filename = asset['name'];
-                        fileUrl = asset['browser_download_url'];
-                        modPath = path.join(getAppData().config.dataPath, 'mods', `${mod.sid}-${version.version}`, 'BepInEx', 'plugins');
-                        tempPath = path.join(getAppData().config.dataPath, 'temp', filename);
-                    }
-                });
-            }
-
-            const response = await axios({
-                method: 'get',
-                url: fileUrl!,
-                responseType: 'stream'
-            });
-
-            const totalLength = response.headers['content-length'];
-            let progress = 0;
-            let lastProgress = 0;
-            let lastTime = Date.now();
-
-            response.data.on('data', (chunk: any) => {
-                progress += chunk.length;
-                const currentTime = Date.now();
-                const elapsedTime = currentTime - lastTime;
-                const bytesDownloaded = progress - lastProgress;
-
-                const percentCompleted = Math.round((progress / totalLength) * 100);
-
-                const speed = elapsedTime > 0 ? (bytesDownloaded / (elapsedTime / 1000)) : 0;
-
-                if (currentTime - lastTime > 100) {
-                    const downloadText = `<div class='w-64'><p>`+trans('Downloading $', mod.name)+`</p>`+this.formatPopinProgress(percentCompleted, speed, progress, totalLength)+`</div>`;
-
-                    if (!finished) {
-                        if (percentCompleted === 100) {
-                            finished = true;
-                        } else {
-                            event.sender.send('createPopin', downloadText, downloadId, "bg-blue-700");
-                        }
-                    }
-
-                    lastProgress = progress;
-                    lastTime = currentTime;
+                } else if (installType === 'dll') {
+                    Files.createDirectoryIfNotExist(modPath);
+                    fs.cpSync(tempPath, path.join(modPath, filename!));
+                    event.sender.send('updatePopin', downloadTextEnd, downloadId, "bg-green-700");
+                    event.sender.send('removePopin', downloadId);
+                    resolve(true);
                 }
 
             });
-
-            const writer = fs.createWriteStream(tempPath);
-            response.data.pipe(writer);
-
-            return new Promise((resolve, reject) => {
-                writer.on('finish', () => {
-                    const downloadText = `<div class='w-64'><p>`+trans('Extracting $...', mod.name)+`</p></div>`;
-                    const downloadTextEnd = `<div class='w-64'><p>`+trans('$ installed!', mod.name)+`</p></div>`;
-                    if (installType === 'zip') {
-                        Files.deleteDirectoryIfExist(tempWorker);
-                        this.extractZipFile(tempPath, tempWorker, event, downloadText, downloadTextEnd, downloadId, "bg-green-700")
-                            .then(() => {
-                                const rootPath = Files.getBepInExInsideDir(tempWorker);
-                                setTimeout(() => {
-                                    Files.moveDirectory(rootPath, modPath);
-                                    resolve(true);
-                                }, 100);
-                            })
-                            .catch((error) => {
-                                reject(error);
-                            });
-                    } else if (installType === 'dll') {
-                        Files.createDirectoryIfNotExist(modPath);
-                        fs.cpSync(tempPath, path.join(modPath, filename!));
-                        event.sender.send('updatePopin', downloadTextEnd, downloadId, "bg-green-700");
-                        event.sender.send('removePopin', downloadId);
-                        resolve(true);
-                    }
-
-                });
-                writer.on('error', reject);
-            });
-        } catch (error) {
-            logError('Error downloading the mod:', error);
-            return false;
-        }
+            writer.on('error', reject);
+        });
     }
 
     static async extractZipFile(zipFilePath: string, outputFolderPath: string, event: any, downloadText: string, downloadTextEnd: string, downloadId: string, classes: string): Promise<boolean> {
         console.log('Extracting...');
         event.sender.send('createPopin', downloadText, downloadId, classes);
         Files.createDirectoryIfNotExist(outputFolderPath);
-        try {
-            const zip = new AdmZip(zipFilePath);
-            await zip.extractAllTo(outputFolderPath, true);
-            console.log('Extraction complete.');
-            event.sender.send('updatePopin', downloadTextEnd, downloadId, classes);
-            event.sender.send('removePopin', downloadId);
-            return true;
-        } catch (err) {
-            logError('Erreur lors de l\'extraction:', err);
-            return false;
-        }
+        const zip = new AdmZip(zipFilePath);
+        await zip.extractAllTo(outputFolderPath, true);
+        console.log('Extraction complete.');
+        event.sender.send('updatePopin', downloadTextEnd, downloadId, classes);
+        event.sender.send('removePopin', downloadId);
+        return true;
     }
 
     static async uninstallMod(event: any, mod: any, version: any): Promise<void> {
@@ -422,7 +407,7 @@ class ModWorker {
                 writer.on('error', reject);
             });
         } catch (error) {
-            logError('Error downloading the mod:', error);
+            logError('Error downloading the mod:', error.message);
             return false;
         }
     }
@@ -511,7 +496,7 @@ class ModWorker {
                 }
             });
         } catch (error) {
-            logError('Error downloading the mod:', error);
+            logError('Error downloading the mod:', error.message);
             return false;
         }
     }
