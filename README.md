@@ -1,3 +1,8 @@
+<p align="center">
+	<a href="https://github.com/MatuxGG/ModManager/releases"><img alt="GitHub Downloads" src="https://img.shields.io/github/downloads/MatuxGG/ModManager/total?label=Github%20downloads"></a>
+	<a href="https://www.curseforge.com/among-us/all-mods/mod-manager"><img alt="Curseforge Downloads" src="https://cf.way2muchnoise.eu/full_494578_downloads.svg"></a>
+</p>
+
 # Mod Manager
 Among Us Mod Manager is an open-source launcher for the popular game Among Us. It allows you to switch between many established mods with only a few clicks!
 
