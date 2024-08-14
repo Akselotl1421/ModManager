@@ -120,35 +120,6 @@ export default {
         window.open(url, '_blank').focus();
       }
     },
-    // translateText(text) {
-    //   // Regex pour trouver les expressions $t[]
-    //   const regex = /\$t\[(.*?)\]/g;
-    //   let matches;
-    //   // Répéter la recherche et le remplacement jusqu'à ce qu'il n'y ait plus de correspondances
-    //   while ((matches = regex.exec(text)) !== null) {
-    //     const fullMatch = matches[0]; // $t[...]
-    //     const innerContent = matches[1]; // Contenu entre les crochets
-    //
-    //     // Séparer la partie texte de la partie paramètres
-    //     const [template, ...params] = innerContent.split(',');
-    //
-    //     // Appeler la fonction de traduction
-    //     const translatedTemplate = this.$t(template.trim());
-    //
-    //     // Remplacer les paramètres % par leurs valeurs dans le texte traduit
-    //     let translatedString = translatedTemplate;
-    //     params.forEach(param => {
-    //       translatedString = translatedString.replace('$', param.trim());
-    //     });
-    //
-    //     // Remplacer l'expression $t[] dans le texte original
-    //     text = text.replace(fullMatch, translatedString);
-    //
-    //     // Réinitialiser l'expression régulière pour recommencer la recherche depuis le début
-    //     regex.lastIndex = 0;
-    //   }
-    //   return text;
-    // }
   },
   provide() {
     return {
@@ -320,6 +291,19 @@ export default {
     window.electronAPI.receiveData('navigate', (route) => {
       this.$router.push(route);
     });
+
+    window.electronAPI.receiveData('connection', (status) => {
+      if (status === true) {
+        document.getElementById("statusDiv").classList.remove("bg-red-700");
+        document.getElementById("statusDiv").classList.add("bg-green-700");
+        document.getElementById("statusText").innerText = "Online";
+      } else {
+        document.getElementById("statusDiv").classList.remove("bg-green-700");
+        document.getElementById("statusDiv").classList.add("bg-red-700");
+        document.getElementById("statusText").innerText = "Offline";
+      }
+    });
+
   },
 }
 </script>

@@ -1,9 +1,8 @@
 import { resolve } from "dns";
 import {app, Notification} from "electron";
-import {getAppData, trans} from "./appGlobals";
+import {getAppData, getMainWindow, trans} from "./appGlobals";
 import https from "https";
 export let isConnected = false;
-let willDisconnect = false;
 let firstConnection = true;
 
 
@@ -34,15 +33,9 @@ function handleDisconnection() {
             handleDisconnectionAndQuit();
             return;
         }
-        let notification = new Notification({title: trans('Connection lost'), body: trans('Mod Manager will try to reconnect during the next 30 seconds.\n If it fails, it will close.')});
-        notification.show();
-        willDisconnect = true;
-        setTimeout(() => {
-            if (willDisconnect) {
-                app.quit();
-                process.exit(0);
-            }
-        }, 30000);
+        getMainWindow().webContents.send('connection', false);
+        // let notification = new Notification({title: trans('Connection lost'), body: trans('Mod Manager will try to reconnect during the next 30 seconds.\n If it fails, it will close.')});
+        // notification.show();
     }
     isConnected = false;
 }
@@ -58,9 +51,9 @@ function handleDisconnectionAndQuit() {
 function handleReconnection() {
     if (isConnected) return;
     console.log('Reconnected');
-    let notification = new Notification({title: trans('Connection back'), body: trans('Mod Manager has reconnected.')});
-    notification.show();
-    willDisconnect = false;
+    getMainWindow().webContents.send('connection', true);
+    // let notification = new Notification({title: trans('Connection back'), body: trans('Mod Manager has reconnected.')});
+    // notification.show();
 }
 
 export function initializeOnlineCheck() {
