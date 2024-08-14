@@ -24,6 +24,7 @@ const setupIPCMainHandlers = () => {
         console.log("Loading data server...");
         if (!getAppData() || !getAppData().isLoaded) {
             await getAppData().loadLocalConfig();
+            getMainWindow().webContents.send('navigate', '/');
             getMainWindow().show();
             await initializeUpdater();
             if (getAppData().isUpdating) return;

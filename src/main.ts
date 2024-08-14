@@ -32,7 +32,7 @@ const loadLocaleMessages = async (locale: string) => {
             translations[locale] = messages;
             console.log(`Translations loaded successfully for locale ${locale}`);
             return true;
-        } catch (error) {
+        } catch (error: any) {
             const elapsedTime = Date.now() - startTime;
             if (elapsedTime < maxRetryTime) {
                 console.warn(`Failed to load translations for locale ${locale}, retrying...`);
@@ -63,7 +63,7 @@ const loadAllTranslations = async () => {
             await Promise.all(loadTranslationsPromises);
             console.log('All translations loaded successfully');
             return languages;
-        } catch (error) {
+        } catch (error: any) {
             const elapsedTime = Date.now() - startTime;
             if (elapsedTime < maxRetryTime) {
                 console.warn('Failed to load all translations, retrying...');

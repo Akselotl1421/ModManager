@@ -1,6 +1,6 @@
 {
   "name": "modmanager7",
-  "version": "7.0.1",
+  "version": "7.0.2",
   "main": "dist-electron/main/index.js",
   "description": "Mod Manager 7 by Good Loss",
   "author": "MatuxGG",
