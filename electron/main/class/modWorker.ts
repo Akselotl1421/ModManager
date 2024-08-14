@@ -192,7 +192,7 @@ class ModWorker {
         event.sender.send('createPopin', downloadText, downloadId, classes);
         Files.createDirectoryIfNotExist(outputFolderPath);
         const zip = new AdmZip(zipFilePath);
-        await zip.extractAllTo(outputFolderPath, true);
+        await zip.extractAllToAsync(outputFolderPath, true);
         console.log('Extraction complete.');
         event.sender.send('updatePopin', downloadTextEnd, downloadId, classes);
         event.sender.send('removePopin', downloadId);
@@ -236,6 +236,7 @@ class ModWorker {
         const amongUsPath = path.join(gamePath, 'Among Us.exe');
         this.loadGameSettings(version.version);
         this.loadData(mod, version);
+        this.addSteamAppIdIfNotExist(gamePath);
         child = spawn(amongUsPath, {});
 
         if (child.pid) {
@@ -310,6 +311,13 @@ class ModWorker {
         }
     }
 
+    static addSteamAppIdIfNotExist(amongUsPath: string) {
+        let steamAppIdFilePath = path.join(amongUsPath, 'steam_appid.txt');
+        if (!Files.existsFolder(steamAppIdFilePath)) {
+            fs.writeFileSync(steamAppIdFilePath, '945360');
+        }
+    }
+
     static async startVanilla(event: any): Promise<void> {
         const isRunning = await this.isProcessRunning('Among Us') || getAppData().startedMod !== false;
         if (isRunning) return;
@@ -318,6 +326,7 @@ class ModWorker {
         event.sender.send('createPopin', `<div class='w-64'><p>`+trans('Starting vanilla...')+`</p></div>`, downloadId, "bg-blue-700");
         const amongUsPath = path.join(getAppData().config.amongUsPath, 'Among Us.exe');
 
+        this.addSteamAppIdIfNotExist(getAppData().config.amongUsPath);
         child = spawn(amongUsPath, {});
 
         if (child.pid) {
