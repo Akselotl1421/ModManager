@@ -1,5 +1,6 @@
 import path from "path";
 import {fileURLToPath} from "node:url";
+import {VITE_DEV_SERVER_URL} from "../index";
 
 let mainWindow = null;
 let tray = null;
@@ -24,8 +25,8 @@ export const AMONGUS_REGIONINFO_PATH = path.join(process.env.APPDATA, '..', 'Loc
 export const AMONGUS_SETTINGS_PATH = path.join(process.env.APPDATA, '..', 'LocalLow', 'Innersloth', 'Among Us', 'settings.amogus');
 export const AMONGUS_OLD_SETTINGS_PATH = path.join(process.env.APPDATA, '..', 'LocalLow', 'Innersloth', 'Among Us', 'settings.amogus.old');
 export const AMONGUS_NEW_SETTINGS_PATH = path.join(process.env.APPDATA, '..', 'LocalLow', 'Innersloth', 'Among Us', 'settings.amogus.new');
-
 export const AMONGUS_DOWNLOAD_LINK = GL_WEBSITE_URL + "/amonguspage";
+export const UPDATE_APP_DATA_INTERVAL = process.env.VITE_DEV_SERVER_URL ? 60000 : 600000;
 
 export const setMainWindow = (win) => {
     mainWindow = win;

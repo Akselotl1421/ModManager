@@ -151,7 +151,7 @@ class Files {
                 });
             });
 
-            req.on('error', (error) => {
+            req.on('error', (error: any) => {
                 logError(error);
                 reject(error);
             });

@@ -46,3 +46,11 @@
 .downloader-line {
     @apply p-2 border-white border rounded cursor-pointer;
 }
+
+.online {
+    @apply bg-green-500 dark:bg-green-700;
+}
+
+.offline {
+    @apply bg-red-500 dark:bg-red-800;
+}

@@ -12,7 +12,7 @@ import {
     updateTray
 } from "./functions";
 import modWorker from "./modWorker";
-import {initializeUpdater, isUpdating} from "./updater";
+import {initializeUpdater} from "./updater";
 
 const setupIPCMainHandlers = () => {
 

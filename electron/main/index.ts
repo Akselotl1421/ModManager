@@ -9,7 +9,7 @@ import {
   setAppData,
   setArgs,
   setMainWindow, setMMIconPath,
-  setTray
+  setTray, trans
 } from "./class/appGlobals";
 import AppData from "./class/appData";
 import {handleArgs, logError} from "./class/functions";

@@ -110,6 +110,7 @@ export default {
       } else {
         document.getElementById("themeDiv").classList.remove("dark");
       }
+      this.connection(true);
     },
     openLink(url) {
       if (window.electronAPI && window.electronAPI.openExternal) {
@@ -118,6 +119,19 @@ export default {
       } else {
         // Environnement web, ouvrir le lien dans un nouvel onglet
         window.open(url, '_blank').focus();
+      }
+    },
+    connection(status) {
+      let statusDiv = document.getElementById("statusDiv");
+      let statusTextDiv = document.getElementById("statusText");
+      if (status) {
+        statusDiv.classList.remove("offline");
+        statusDiv.classList.add("online");
+        statusTextDiv.innerText = this.$t("Online");
+      } else {
+        statusDiv.classList.remove("online");
+        statusDiv.classList.add("offline");
+        statusTextDiv.innerText = this.$t("Offline");
       }
     },
   },
@@ -293,15 +307,7 @@ export default {
     });
 
     window.electronAPI.receiveData('connection', (status) => {
-      if (status === true) {
-        document.getElementById("statusDiv").classList.remove("bg-red-700");
-        document.getElementById("statusDiv").classList.add("bg-green-700");
-        document.getElementById("statusText").innerText = "Online";
-      } else {
-        document.getElementById("statusDiv").classList.remove("bg-green-700");
-        document.getElementById("statusDiv").classList.add("bg-red-700");
-        document.getElementById("statusText").innerText = "Offline";
-      }
+      this.connection(status);
     });
 
     window.electronAPI.receiveData('updateAppData', (appData) => {

@@ -17,6 +17,7 @@ import fs from "fs";
 // @ts-ignore
 import axios from "axios";
 import {isOnline} from "./onlineCheck";
+import {ModVersion} from "./modVersion";
 
 export const handleArgs = () => {
     let args = getArgs();
@@ -57,19 +58,24 @@ export const downloadMod = async (event, mod, version) => {
     console.log("Downloading mod on server...");
     let downloadLines = [];
     if (mod.type !== "allInOne") {
+        let oldVersion = null;
         let installedVersions = getAppData().getInstalledModVersions(mod.sid);
         let versions = getAppData().getModVersions(mod.sid);
         for (const installedVersion of installedVersions) {
-            if (!versions.some(v => v.version === installedVersion.version)) {
-                let generatedMod = mod;
-                generatedMod.version = installedVersion.version;
-                let generatedVersion = {'version': installedVersion.version};
-                downloadLines.push(["update", generatedMod, generatedVersion]);
+            if (versions.some(v => v.version === installedVersion.version && v.release.tag_name !== installedVersion.releaseVersion)) {
+                oldVersion = installedVersion;
             }
         }
 
-        if (!isDownloadInProgress("mod", mod, version) && !getAppData().isInstalledModFromIdAndVersion(mod.sid, version.version)) {
-            downloadLines.push(["mod", mod, version]);
+        if (oldVersion !== null) {
+            if (!isDownloadInProgress("update", mod, version)) {
+                let generatedVersion = {'version': oldVersion.version, 'release': {'tag_name': oldVersion.releaseVersion}};
+                downloadLines.push(["update", mod, version, generatedVersion]);
+            }
+        } else if (!getAppData().isInstalledModFromIdAndVersion(mod.sid, version.version)) {
+            if (!isDownloadInProgress("mod", mod, version)) {
+                downloadLines.push(["mod", mod, version]);
+            }
         }
 
         for (const dep of version.modDependencies) {
@@ -87,7 +93,6 @@ export const downloadMod = async (event, mod, version) => {
             downloadLines.push(["allInOne", mod, version]);
         }
     }
-
 
     if (downloadLines.length === 0) {
         return;
@@ -111,7 +116,10 @@ export const downloadMod = async (event, mod, version) => {
                 }
                 break;
             case "update":
-                promises.push(ModWorker.uninstallMod(event, dl[1], dl[2]));
+                promises.push(ModWorker.uninstallMod(event, dl[1], dl[3]));
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                promises.push(ModWorker.downloadMod(event, dl[1], dl[2]));
+                break;
         }
         //promises.push(dl[3]);
     }
@@ -125,7 +133,8 @@ export const downloadMod = async (event, mod, version) => {
         } else if (dl[0] === "vanilla") {
             getAppData().config.addInstalledVanilla(dl[2].gameVersion);
         } else if (dl[0] === "update") {
-            getAppData().config.removeInstalledMod(dl[1], dl[2]);
+            getAppData().config.removeInstalledMod(dl[1], dl[3]);
+            getAppData().config.addInstalledMod(dl[1], dl[2]);
         } else if (dl[0] === "allInOne") {
             getAppData().config.addInstalledMod(dl[1], null);
         }
@@ -243,7 +252,7 @@ export const updateTray = () => {
             });
         } else {
             modsLines.push({
-                label: trans("Stop $", getAppData().startedMod[0].name+" "+getAppData().startedMod[1].release.tag_name),
+                label: getAppData().startedMod[0] === 'Vanilla' ? 'Stop vanilla' : trans("Stop $", getAppData().startedMod[0].name+" "+getAppData().startedMod[1].release.tag_name),
                 click: function () {
                     getMainWindow().webContents.send('handleArgs', 'stopCurrentMod');
                 }
