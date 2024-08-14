@@ -1,6 +1,6 @@
 import { resolve } from "dns";
 import {app, Notification} from "electron";
-import {getAppData, getMainWindow, trans} from "./appGlobals";
+import {getAppData, getMainWindow, trans, UPDATE_APP_DATA_INTERVAL} from "./appGlobals";
 import https from "https";
 export let isConnected = false;
 let firstConnection = true;
@@ -68,8 +68,9 @@ export function initializeOnlineCheck() {
         liveCheck();
     }, 5000);
     setInterval(function() {
+        console.log('Update app data');
         updateAppData();
-    }, 10*60*1000);
+    }, UPDATE_APP_DATA_INTERVAL);
 }
 
 export function isOnline() {
