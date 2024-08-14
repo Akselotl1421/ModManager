@@ -304,6 +304,10 @@ export default {
       }
     });
 
+    window.electronAPI.receiveData('updateAppData', (appData) => {
+      this.$store.commit('setAppData', appData);
+    });
+
   },
 }
 </script>

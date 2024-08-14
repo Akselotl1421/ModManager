@@ -56,11 +56,20 @@ function handleReconnection() {
     // notification.show();
 }
 
+async function updateAppData() {
+    if (!isConnected) return;
+    await getAppData().updateAppData();
+    getMainWindow().webContents.send('updateAppData', getAppData());
+}
+
 export function initializeOnlineCheck() {
     liveCheck();
     setInterval(function() {
         liveCheck();
     }, 5000);
+    setInterval(function() {
+        updateAppData();
+    }, 10*60*1000);
 }
 
 export function isOnline() {

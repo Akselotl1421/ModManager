@@ -15,16 +15,16 @@
         </p>
 
         <!-- Country flag -->
-        <template v-if="mod.countries === 'fr'">
-          <img class="h-5 border border-black dark:border-white" src="../assets/fr.png" />
+        <template v-if="mod.countries.toLowerCase() === 'fr'">
+          <img v-if="mod.countries" class="h-5 border border-black dark:border-white" src="../assets/FR.png" />
         </template>
-        <template v-else-if="mod.countries === 'es'">
-          <img v-if="mod.countries" class="h-5 border border-black dark:border-white" src="../assets/es.png" />
+        <template v-else-if="mod.countries.toLowerCase() === 'es'">
+          <img v-if="mod.countries" class="h-5 border border-black dark:border-white" src="../assets/ES.png" />
         </template>
-        <template v-else-if="mod.countries === 'jp'">
+        <template v-else-if="mod.countries.toLowerCase() === 'jp'">
           <img v-if="mod.countries" class="h-5 border border-black dark:border-white" src="../assets/jp.png" />
         </template>
-        <template v-else-if="mod.countries === 'cn'">
+        <template v-else-if="mod.countries.toLowerCase() === 'cn'">
           <img v-if="mod.countries" class="h-5 border border-black dark:border-white" src="../assets/cn.png" />
         </template>
         <template v-else>

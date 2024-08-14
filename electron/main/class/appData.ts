@@ -43,6 +43,13 @@ class AppData {
         let ModManager5Path = path.join(process.env.APPDATA, 'ModManager');
         Files.deleteDirectoryIfExist(ModManager5Path);
         this.subFolders.forEach(folder => Files.createDirectoryIfNotExist(path.join(this.config.dataPath, folder)));
+        await this.updateAppData();
+        this.config.version = app.getVersion();
+        this.isLoaded = true;
+        console.log("Appdata loaded");
+    }
+
+    async updateAppData(): Promise<void> {
         this.modSources = [];
         let downloadPromises = this.config.sources.map(source => this.downloadSource(source));
         try {
@@ -50,9 +57,6 @@ class AppData {
         } catch (error: any) {
             logError("Error when downloading sources (load)", error.message);
         }
-        this.config.version = app.getVersion();
-        this.isLoaded = true;
-        console.log("Appdata loaded");
     }
 
     async resetApp(): Promise<void> {
@@ -101,9 +105,6 @@ class AppData {
     }
 
     async downloadRelease(mod: Mod): Promise<void> {
-        if (mod.sid === 'TownofHostEnhanced') {
-            console.log(JSON.stringify(mod.releases));
-        }
         try {
             mod.releases = <any>await Files.getGithubReleases(mod.author, mod.github, this.githubToken);
             if (!mod.releases) return;

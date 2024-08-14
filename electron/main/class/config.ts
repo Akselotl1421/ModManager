@@ -60,7 +60,7 @@ class Config {
         try {
             this.amongUsPath = await this.getSteamLocation();
         } catch (err) {
-            let notification = new Notification({ title: trans('Among Us not found'), body: trans('Please uninstall and reinstall it to solve the issue.\nMod Manager will close!') });
+            let notification = new Notification({ title: trans('Among Us not found'), body: trans('Please uninstall and reinstall it to solve the issue.\nOnly Steam version is supported.\nMod Manager will close!') });
             notification.show();
             shell.openExternal(AMONGUS_DOWNLOAD_LINK);
             app.quit()
