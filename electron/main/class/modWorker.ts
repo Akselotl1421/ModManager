@@ -106,7 +106,7 @@ class ModWorker {
 
         if (installType === null) {
             version.release['assets'].forEach((asset: any) => {
-                if (asset['name'].endswith('.dll')) {
+                if (asset['name'].endsWith('.dll')) {
                     installType = 'dll';
                     filename = asset['name'];
                     fileUrl = asset['browser_download_url'];
@@ -166,10 +166,8 @@ class ModWorker {
                     this.extractZipFile(tempPath, tempWorker, event, downloadText, downloadTextEnd, downloadId, "bg-green-700")
                         .then(() => {
                             const rootPath = Files.getBepInExInsideDir(tempWorker);
-                            setTimeout(() => {
-                                Files.moveDirectory(rootPath, modPath);
-                                resolve(true);
-                            }, 100);
+                            Files.moveDirectory(rootPath, modPath);
+                            resolve(true);
                         })
                         .catch((error) => {
                             reject(error);

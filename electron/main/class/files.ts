@@ -112,8 +112,8 @@ class Files {
         files.forEach(file => {
             const oldPath = path.join(sourceDir, file);
             const newPath = path.join(targetDir, file);
-
-            fs.copyFileSync(oldPath, newPath);
+            if (!fs.existsSync(newPath))
+               fs.copyFileSync(oldPath, newPath);
         });
     }
 

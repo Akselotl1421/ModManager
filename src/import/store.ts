@@ -217,13 +217,14 @@ export const store = createStore({
             return state.appData?.config.favoriteMods.some(fm => fm.modId === modId && (version === null || fm.version === version.version));
         },
         getFavoriteCount: (state: AppState, getters: any) => () => {
-            let count = 0;
-            state.appData?.config.installedMods.forEach(im => {
-                let versions = state.appData?.modSources.flatMap(source => source.mods.find(m => m.sid === im.modId)?.versions);
-                let favoriteVersions = versions?.filter(version => getters.isFavoriteMod(im.modId, version));
-                count += favoriteVersions?.length || 0;
-            });
-            return count;
+            // let count = 0;
+            // state.appData?.config.installedMods.forEach(im => {
+            //     let versions = state.appData?.modSources.flatMap(source => source.mods.find(m => m.sid === im.modId)?.versions);
+            //     let favoriteVersions = versions?.filter(version => getters.isFavoriteMod(im.modId, version));
+            //     count += favoriteVersions?.length || 0;
+            // });
+            // return count;
+            return state.appData?.config.favoriteMods.length;
         },
         canBeUpdated: (state: AppState) => (modId: string, version: ModVersion | null) => {
             let installedMod: InstalledMod | undefined = state.appData?.config.installedMods.find(im => im.modId === modId && (version === null || im.version === version.version));

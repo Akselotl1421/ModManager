@@ -27,13 +27,13 @@
           <template v-for="mod in filteredMods"
                     :key="mod.sid">
             <template v-if="mod.type === 'allInOne'">
-              <template v-if="this.isInstalledMod(mod.sid)">
+              <template v-if="this.isInstalledMod(mod.sid) || selectedCategory === 'Favorites'">
                 <ModCard :mod="mod" />
               </template>
             </template>
             <template v-else>
               <template v-for="version in mod.versions" :key="version.version">
-                <template v-if="(this.isInstalledMod(mod.sid, version)) && (selectedGameVersion === '' || selectedGameVersion === version.gameVersion)">
+                <template v-if="(this.isInstalledMod(mod.sid, version) || selectedCategory === 'Favorites') && (selectedGameVersion === '' || selectedGameVersion === version.gameVersion)">
                   <ModCard :mod="mod" :version="version" />
                 </template>
               </template>
